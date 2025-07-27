@@ -1,254 +1,421 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 9 créditos restantes para usar o sistema de feedback AI.
+Você tem 8 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para theokiwi:
 
-Nota final: **0.0/100**
+Nota final: **23.9/100**
 
-# Feedback do seu Desafio API REST com Express.js 🚔✨
+# Feedback para theokiwi 🚓✨
 
-Olá, theokiwi! Tudo bem? Primeiro, quero te parabenizar pelo esforço em começar essa API para o Departamento de Polícia! 🎉 Você já tem algumas coisas legais no seu código, e isso é muito importante para crescer como dev. Vamos juntos destrinchar o que está faltando e como ajustar para que sua API funcione do jeitinho que o desafio pede! 💪
+Olá, theokiwi! Primeiro, quero te parabenizar pelo esforço em montar essa API para o Departamento de Polícia! Criar uma aplicação RESTful com Node.js e Express não é tarefa fácil, e você já caminhou bastante nessa jornada. 🎉
 
----
+## O que você mandou bem! 👏
 
-## 🎯 Primeira Vitória: Parabéns pelas Implementações nos Controllers!
+- A estrutura geral do projeto está bem modularizada, com pastas separadas para `routes`, `controllers` e `repositories`. Isso é fundamental para manter o código organizado e escalável.
+- Você implementou as rotas para os agentes e casos, com todos os métodos HTTP necessários (GET, POST, PUT, PATCH, DELETE). Isso mostra que você entendeu a importância de cobrir todas as operações CRUD.
+- O uso do middleware `express.json()` no `server.js` está correto para receber payloads JSON.
+- Você já implementou a lógica de filtragem e ordenação para agentes e casos, o que é um ótimo sinal de que está avançando bem.
+- Também cuidou da validação básica, retornando status 400 e 404 quando os dados estão ausentes ou IDs não existem. Isso é essencial para uma API robusta.
 
-Eu vi que você estruturou bem os controllers `agentesController.js` e `casosController.js`, com várias funções que parecem corresponder às operações que a API precisa ter (GET, POST, PUT, PATCH, DELETE). Isso mostra que você entendeu a ideia de separar a lógica da aplicação em camadas, o que é fundamental para um código organizado e escalável. 👏
-
-Além disso, você já fez algumas validações de payload, retornando status 400 quando o corpo da requisição está ausente, e status 404 quando um recurso não é encontrado. Isso é excelente! 👍
-
----
-
-## 🕵️‍♂️ Agora, vamos ao que precisa de atenção para destravar sua API:
-
-### 1. **Faltam os Arquivos de Rotas (`routes/agentesRoutes.js` e `routes/casosRoutes.js`)**
-
-Um ponto fundamental que impede sua API de funcionar são as rotas. No seu `server.js`, você está importando os arquivos `agentesRouter` e `casosRouter` e usando-os:
-
-```js
-const agentesRouter = require('./routes/agentesRouter');
-const casosRouter = require('./routes/casosRouter');
-
-app.use(agentesRouter);
-app.use(casosRouter);
-```
-
-Porém, esses arquivos **não existem** no seu repositório! 😮 Isso significa que o Express não sabe qual caminho (endpoint) vai acionar qual função do controller. Sem as rotas, sua API não responde às requisições.
-
-👉 **O que fazer?** Criar os arquivos `routes/agentesRoutes.js` e `routes/casosRoutes.js` e definir as rotas usando o `express.Router()`. Por exemplo, para os agentes:
-
-```js
-const express = require('express');
-const router = express.Router();
-const agentesController = require('../controllers/agentesController');
-
-router.get('/agentes', agentesController.getAllAgentes);
-router.get('/agentes/:id', agentesController.listID);
-router.post('/agentes', agentesController.addAgente);
-router.put('/agentes/:id', agentesController.updateAgenteFull);
-router.patch('/agentes/:id', agentesController.updateAgente);
-router.delete('/agentes/:id', agentesController.deleteAgente);
-
-module.exports = router;
-```
-
-E o mesmo para os casos, adaptando para `/casos` e as funções do `casosController`.
-
-Sem isso, nenhuma requisição vai funcionar, pois o Express não sabe para onde direcionar.
-
-📚 Recomendo fortemente assistir a esses recursos para entender melhor roteamento no Express:
-
-- [Documentação oficial do Express sobre Routing](https://expressjs.com/pt-br/guide/routing.html)
-- [Vídeo sobre Arquitetura MVC em Node.js](https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH)
+## Agora, vamos juntos destrinchar os pontos que precisam de atenção para que sua API funcione 100% e você evolua ainda mais! 🕵️‍♂️🔍
 
 ---
 
-### 2. **Middleware para Processar JSON no Corpo da Requisição**
+## 1. Problemas fundamentais no repositório (manipulação dos dados em memória)
 
-No seu `server.js`, não vi o uso do middleware `express.json()`. Isso é essencial para que o Express consiga interpretar o corpo das requisições que chegam em JSON (como no POST e PUT).
+Ao analisar o seu `agentesRepository.js` e `casosRepository.js`, percebi que as funções de atualização e remoção estão com problemas que impactam diretamente o funcionamento da API.
 
-Sem isso, ao tentar acessar `req.body` você terá `undefined`, e seu código vai entender que não recebeu dados, retornando erros.
-
-👉 **Solução simples:** Adicione essa linha antes de usar as rotas:
+### Exemplo no `agentesRepository.js`:
 
 ```js
-app.use(express.json());
-```
+// Remove agente
+function removeAgente(id){
+  const agenteToRemove = agentes.findIndex(item => item.id === id);
+  if(agenteToRemove > -1){
+    agentes.splice(agenteToRemove, 1);
+  }
+  return null; // sempre retorna null, mesmo se removeu!
+}
 
-Assim, o Express vai conseguir entender o corpo das requisições e suas funções de criação e atualização vão funcionar.
-
-📚 Para entender melhor o uso de middlewares para parsing de JSON:
-
-- [Vídeo sobre Manipulação de Requisições e Respostas](https://youtu.be/--TQwiNIw28)
-
----
-
-### 3. **Correções Importantes nos Repositórios**
-
-No arquivo `repositories/casosRepository.js` tem alguns problemas que impactam diretamente a manipulação dos dados:
-
-- A função `findCaso(id)` está retornando o índice do caso no array, não o objeto do caso. Isso vai causar erros no controller quando você tentar acessar propriedades do caso. Veja:
-
-```js
-function findCaso(id) {
-    return casos.findIndex((item) => item.id === id);
+// Atualiza agente
+function updateAgente(id, agenteData){
+  const index = findAgente(id); // findAgente retorna o objeto, não o índice!
+  if(index == -1){
+    return null;
+  }
+  agentes[index] = {
+    ...agentes[index],
+    ...agenteData
+  }
+  return agentes[index];
 }
 ```
 
-Aqui deveria usar `find` para retornar o objeto, não o índice:
+**O que está acontecendo?**
 
-```js
-function findCaso(id) {
-    return casos.find((item) => item.id === id);
-}
-```
+- Na função `removeAgente`, você está sempre retornando `null`, mesmo quando remove o agente. Isso faz com que seu controller ache que não encontrou o agente para remover e retorne 404, mesmo quando ele existe.
 
-- Na função `updateCaso`, você está fazendo:
+- Na função `updateAgente`, você está usando `findAgente(id)` para obter o índice do agente, mas essa função retorna o objeto agente, não o índice no array. Então `index` nunca será um número válido para acessar o array e atualizar.
 
-```js
-casos[index] = {
-    ...casos[index],
-    CasoData,
-};
-```
-
-Isso vai criar uma propriedade chamada `CasoData` dentro do objeto, em vez de mesclar as propriedades. O correto é espalhar as propriedades de `CasoData`:
-
-```js
-casos[index] = {
-    ...casos[index],
-    ...CasoData,
-};
-```
-
-- Na função `removeCaso`, você remove o caso do array, mas não retorna nada. Para que o controller saiba se a remoção foi feita, você deve retornar o objeto removido ou `null` se não encontrou:
+O mesmo padrão ocorre no arquivo `casosRepository.js`:
 
 ```js
 function removeCaso(id) {
-    const index = casos.findIndex((item) => item.id === id);
-    if (index > -1) {
-        return casos.splice(index, 1)[0];
+    const CasoToRemove = casos.findIndex((item) => item.id === id);
+    if (CasoToRemove > -1) {
+        casos.splice(CasoToRemove, 1);
     }
-    return null;
+    return null; // sempre null, mesmo após remover
+}
+
+function updateCaso(id, CasoData) {
+    const index = findCaso(id); // findCaso retorna o objeto, não o índice
+    if (index == -1) {
+        return null;
+    }
+    casos[index] = {
+        ...casos[index],
+        ...CasoData,
+    };
+    return casos[index];
 }
 ```
 
-Essas correções são importantes para que os controllers consigam manipular os dados corretamente.
+### Como corrigir?
 
-📚 Para aprender mais sobre manipulação de arrays em JavaScript:
+Você precisa usar `findIndex` para obter o índice do item no array para atualizar e remover, e retornar corretamente o objeto removido ou atualizado.
 
-- [Manipulação de Arrays - Vídeo](https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI)
+Por exemplo, para `updateAgente`:
+
+```js
+function updateAgente(id, agenteData){
+  const index = agentes.findIndex(item => item.id === id);
+  if(index === -1){
+    return null;
+  }
+  agentes[index] = {
+    ...agentes[index],
+    ...agenteData
+  }
+  return agentes[index];
+}
+```
+
+E para `removeAgente`:
+
+```js
+function removeAgente(id){
+  const index = agentes.findIndex(item => item.id === id);
+  if(index === -1){
+    return null;
+  }
+  const removed = agentes.splice(index, 1)[0];
+  return removed;
+}
+```
+
+O mesmo vale para os casos no `casosRepository.js`.
 
 ---
 
-### 4. **IDs e Validação de UUID**
+## 2. Endpoints de criação (POST) com payloads mal estruturados
 
-Percebi que seus dados de `agentes` e `casos` possuem IDs que são strings, mas não há garantia de que sejam UUIDs válidos, e seu código não valida isso.
+No seu controller de agentes (`agentesController.js`), o método `addAgente` espera receber um objeto com a propriedade `newAgente` dentro do corpo da requisição:
 
-Além disso, vi que em alguns lugares você usa `agente_id`, em outros `agenteId` (ex: em `getAgenteCaso`), o que pode causar inconsistência.
+```js
+function addAgente(req, res){
+  const {newAgente} = req.body;
+  
+  if(!newAgente){
+       return res
+            .status(400)
+            .json({ message: 'Agente a ser inserido não encontrado' });
+  }
 
-👉 **Dica:** Mantenha o padrão de nomes (snake_case ou camelCase) consistente em todo o projeto para evitar confusões.
+  const agenteAdded = agentesRepository.addAgente(newAgente);
+  return res.status(201).json(agenteAdded);
+}
+```
 
-Também é importante garantir que o ID não possa ser alterado nas atualizações (PUT/PATCH). No seu controller de casos, por exemplo, você permite que o ID seja alterado, o que não é recomendado.
+Mas o esperado é que o cliente envie diretamente os dados do agente no corpo da requisição, não dentro de uma propriedade `newAgente`. Isso pode estar causando falha na criação do agente.
 
-📚 Para entender melhor sobre UUID e validação:
+O mesmo acontece para `addCaso` no `casosController.js`:
 
-- [Documentação sobre status 400 e validação](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400)
+```js
+function addCaso(req, res) {
+    const { caso_content } = req.body;
+
+    if (!caso_content) {
+        return res
+            .status(400)
+            .json({ message: 'Caso a ser inserido não encontrado' });
+    }
+
+    const novoCaso = casosRepository.addCaso(caso_content);
+
+    return res.status(201).json(novoCaso);
+}
+```
+
+Aqui, espera-se que o payload venha com os campos do caso diretamente, não dentro de `caso_content`.
+
+### Como corrigir?
+
+No `addAgente`:
+
+```js
+function addAgente(req, res){
+  const newAgente = req.body; // pega o corpo diretamente
+  
+  if(!newAgente || !newAgente.nome || !newAgente.cargo || !newAgente.dataDeIncorporacao){
+       return res
+            .status(400)
+            .json({ message: 'Dados do agente incompletos ou inválidos' });
+  }
+
+  const agenteAdded = agentesRepository.addAgente(newAgente);
+  return res.status(201).json(agenteAdded);
+}
+```
+
+No `addCaso`:
+
+```js
+function addCaso(req, res) {
+    const casoData = req.body;
+
+    if (!casoData || !casoData.titulo || !casoData.descricao || !casoData.status || !casoData.agente_id) {
+        return res.status(400).json({ message: 'Dados do caso incompletos ou inválidos' });
+    }
+
+    // Verificar se o agente_id existe no repositório de agentes
+    const agenteExiste = agentesRepository.findAgente(casoData.agente_id);
+    if (!agenteExiste) {
+        return res.status(404).json({ message: 'Agente responsável não encontrado' });
+    }
+
+    const novoCaso = casosRepository.addCaso(casoData);
+
+    return res.status(201).json(novoCaso);
+}
+```
 
 ---
 
-### 5. **Erros de Variáveis e Pequenos Bugs**
+## 3. Rota POST `/casos/:id` incorreta
 
-Alguns pequenos bugs podem travar sua API:
-
-- No `listID` do `agentesController.js`, você usa `agente_id` que não está definido:
+No arquivo `routes/casosRoutes.js` você definiu o endpoint para criação de casos assim:
 
 ```js
-const { id } = req.params;
-const agente = agentesRepository.findAgente(agente_id);
+router.post('/casos/:id', casosController.addCaso);
 ```
 
-Aqui deveria ser:
+Mas o correto é que a criação de um novo caso não deve receber um `id` na URL, pois o `id` será gerado automaticamente. A rota correta para criar um caso é:
 
 ```js
-const { id } = req.params;
-const agente = agentesRepository.findAgente(id);
+router.post('/casos', casosController.addCaso);
 ```
 
-- No `getAgenteCaso` do `casosController.js`, você usa `casos.agenteId` (variável `casos` não existe, é `caso`):
-
-```js
-const agente_id = casos.agenteId;
-```
-
-Deveria ser:
-
-```js
-const agente_id = caso.agente_id;
-```
-
-- No filtro de busca por `search` no `getCasos`, você está usando `toLowerCase` sem chamar como função:
-
-```js
-casos.titulo.toLowerCase().includes(search.toLowerCase)
-```
-
-Deveria ser:
-
-```js
-casos.titulo.toLowerCase().includes(search.toLowerCase())
-```
-
-Esses detalhes pequenos quebram o fluxo da aplicação, então revise com calma!
+Essa confusão impede que o endpoint funcione corretamente e pode gerar erros inesperados.
 
 ---
 
-### 6. **Estrutura de Diretórios e Nome dos Arquivos**
+## 4. Problemas na busca de agente responsável por caso
 
-A estrutura que você enviou está quase correta, mas os arquivos de rotas estão nomeados como `agentesRouter.js` e `casosRouter.js`, enquanto o esperado é `agentesRoutes.js` e `casosRoutes.js` (com "Routes", plural).
+No `casosController.js`, a função `getAgenteCaso` tem alguns problemas de referência:
 
-Além disso, os arquivos de rota não existem, como já mencionei.
+```js
+function getAgenteCaso(req, res) {
+    const { caso_id } = req.params;
+    let caso = casosRepository.findCaso(caso_id);
 
-Manter a estrutura correta é obrigatório para que o projeto seja compreendido e funcione adequadamente.
+    if (!caso) {
+        return res.status(404).json({ message: 'Caso não encontrados' });
+    }
 
-📚 Para entender melhor a arquitetura MVC e organização de projetos:
+    const agente_id = casos.agente_id; // 'casos' está indefinido, o certo é 'caso'
+    const agente = agentesRepository.findAgente(agente_id);
 
-- [Vídeo sobre Arquitetura MVC em Node.js](https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH)
+    return res.status(200).json(agente);
+}
+```
+
+Note que você usou `casos.agente_id` em vez de `caso.agente_id`. Isso gera erro de referência e impede o retorno correto do agente.
+
+### Como corrigir?
+
+```js
+function getAgenteCaso(req, res) {
+    const { caso_id } = req.params;
+    let caso = casosRepository.findCaso(caso_id);
+
+    if (!caso) {
+        return res.status(404).json({ message: 'Caso não encontrado' });
+    }
+
+    const agente_id = caso.agente_id;
+    const agente = agentesRepository.findAgente(agente_id);
+
+    if (!agente) {
+        return res.status(404).json({ message: 'Agente responsável não encontrado' });
+    }
+
+    return res.status(200).json(agente);
+}
+```
 
 ---
 
-## 🚀 Resumo Rápido para Você Avançar:
+## 5. Validação e proteção do campo `id` nos updates (PUT e PATCH)
 
-- [ ] Crie os arquivos de rotas `routes/agentesRoutes.js` e `routes/casosRoutes.js` usando `express.Router()` e conecte-os no `server.js`.
-- [ ] Adicione `app.use(express.json())` no `server.js` para processar JSON no corpo das requisições.
-- [ ] Corrija as funções do `casosRepository.js`: `findCaso` deve retornar o objeto, `updateCaso` deve espalhar o objeto, `removeCaso` deve retornar o removido.
-- [ ] Padronize o uso de nomes de propriedades (`agente_id` vs `agenteId`) e garanta que IDs não possam ser alterados.
-- [ ] Corrija bugs de variáveis incorretas nos controllers (`agente_id` vs `id`, `casos` vs `caso`, `toLowerCase` como função).
-- [ ] Ajuste a estrutura e nomes dos arquivos para seguir o padrão esperado.
-- [ ] Considere validar IDs UUID e impedir alterações indevidas de IDs.
-- [ ] Revise e teste cuidadosamente cada endpoint após as correções.
+Percebi que nos seus métodos de atualização (PUT e PATCH) para agentes e casos, você permite que o campo `id` seja alterado via payload — isso não é uma boa prática, pois o `id` deve ser imutável.
+
+Por exemplo, no seu controller de agentes:
+
+```js
+function updateAgenteFull(req, res){
+  const {id} = req.params;
+  const novosDados = req.body;
+
+  // ...
+
+  let agente = agentesRepository.findAgente(id);
+
+  agente = {
+    id: agente.id, // aqui você preserva o id, o que é bom
+    ...novosDados
+  };
+
+  agentesRepository.updateAgente(agente);
+  return res.status(200).json(agente);
+}
+```
+
+Mas no PATCH:
+
+```js
+function updateAgente(req, res){
+  const {id} = req.params;
+  const novosDados = req.body;
+
+  // ...
+
+  let agente = agentesRepository.findAgente(id);
+
+  agente = {
+    ...agente,
+    ...novosDados
+  };
+  // Aqui, se 'novosDados' tiver 'id', ele sobrescreve o original!
+
+  agentesRepository.updateAgente(agente);
+  return res.status(200).json(agente);
+}
+```
+
+### Como corrigir?
+
+Antes de mesclar os dados, remova o campo `id` do `novosDados` para evitar alteração:
+
+```js
+function updateAgente(req, res){
+  const {id} = req.params;
+  const novosDados = {...req.body};
+
+  if (novosDados.id) {
+    delete novosDados.id; // impede alteração do id
+  }
+
+  // resto do código...
+}
+```
+
+Faça o mesmo para os casos.
 
 ---
 
-## 🌟 Finalizando: Você está no caminho certo!
+## 6. IDs não são UUIDs gerados
 
-Sei que pode parecer muita coisa, mas todos esses ajustes são passos naturais para quem está aprendendo a construir APIs REST com Node.js e Express. Você já mostrou que entende a ideia geral e tem uma boa base para crescer! Continue estudando, praticando e revisando seu código com calma. Estou aqui torcendo pelo seu sucesso! 🚀✨
+Você está usando `uuidv4()` para gerar novos IDs, mas não vi importação dessa função no seu código (nem no `repositories` nem nos controllers). Isso pode estar fazendo com que o ID gerado seja `undefined` ou inválido, causando falhas de validação.
 
-Se quiser, pode começar assistindo este vídeo para reforçar os fundamentos do Express e roteamento:
+### O que fazer?
 
-- [Fundamentos de API REST e Express.js](https://youtu.be/RSZHvQomeKE)
+No topo dos arquivos onde você gera IDs (`agentesRepository.js`, `casosRepository.js`), importe o pacote uuid:
 
-E para entender melhor como validar dados e tratar erros:
+```js
+const { v4: uuidv4 } = require('uuid');
+```
 
-- [Validação de dados em APIs Node.js/Express](https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_)
-
-Qualquer dúvida, grita aqui que a gente resolve juntos! 👊😉
+E certifique-se de que o pacote `uuid` está instalado (`npm install uuid`).
 
 ---
 
-Abraços de Code Buddy,  
-Até a próxima revisão! 👨‍💻🚓✨
+## 7. Status HTTP para remoção (DELETE)
+
+Nos seus métodos de remoção (`deleteAgente` e `deleteCaso`), você retorna status 200 e o objeto removido. O ideal para DELETE é retornar status **204 No Content** com corpo vazio, para indicar que a exclusão foi bem sucedida sem enviar dados extras.
+
+### Como melhorar?
+
+No controller:
+
+```js
+function deleteAgente(req, res) {
+    const { id } = req.params;
+
+    const agenteRemovido = agentesRepository.removeAgente(id);
+
+    if (!agenteRemovido) {
+        return res.status(404).json({ message: 'Agente não encontrado' });
+    }
+
+    return res.status(204).send();
+}
+```
+
+---
+
+## 8. Estrutura de diretórios está boa, mas faltam arquivos para tratamento de erros e documentação
+
+Você tem as pastas básicas, mas não vi o uso de um middleware centralizado para tratamento de erros (ex: `utils/errorHandler.js`) nem documentação Swagger (`docs/swagger.js`). Embora não seja obrigatório para a versão básica, isso ajuda muito na manutenção e qualidade da API.
+
+---
+
+## 9. Outras pequenas melhorias
+
+- No `agentesController.js`, o método `getAllAgentes` não está sendo exportado nem utilizado nas rotas. Você pode removê-lo para evitar confusão.
+- Mensagens de erro têm pequenos erros de digitação, como `"Agente come essa ID não encontrado"` — cuidado para deixar as mensagens claras e profissionais.
+- No `casosController.js`, o método `listID` retorna o objeto `caso` no status 404 quando não encontrado, o correto é enviar uma mensagem de erro.
+
+---
+
+# Recursos que recomendo para você avançar 🚀
+
+- [Entenda o básico de API REST e Express.js](https://youtu.be/RSZHvQomeKE) — para consolidar fundamentos.
+- [Documentação oficial do Express sobre roteamento](https://expressjs.com/pt-br/guide/routing.html) — para organizar melhor suas rotas.
+- [Como validar dados e tratar erros em APIs Node.js](https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_) — para melhorar a robustez da sua API.
+- [Manipulação de arrays em JavaScript](https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI) — para entender como usar `findIndex`, `filter`, `map` e outros métodos.
+
+---
+
+# Resumo rápido dos principais pontos para focar:
+
+- Corrigir funções de update e remove nos repositórios para usar `findIndex` e retornar o item removido/atualizado.
+- Ajustar payloads dos métodos POST para receber dados diretamente, sem propriedades extras (`newAgente`, `caso_content`).
+- Corrigir rota POST `/casos/:id` para `/casos`.
+- Corrigir referência errada em `getAgenteCaso` para usar `caso.agente_id`.
+- Impedir alteração do campo `id` em atualizações (PUT/PATCH).
+- Importar e usar corretamente `uuidv4` para gerar IDs válidos.
+- Melhorar status HTTP de DELETE para 204 No Content.
+- Revisar mensagens de erro para clareza e profissionalismo.
+
+---
+
+theokiwi, você já tem uma base muito boa, e com esses ajustes seu projeto vai ficar muito mais robusto e alinhado com as boas práticas! Continue firme, corrigindo esses pontos e estudando os recursos indicados. Estou aqui torcendo pelo seu sucesso! 🚀💪
+
+Se precisar de ajuda para implementar qualquer uma dessas correções, é só chamar! 😉
+
+Um abraço e bons códigos! 👨‍💻👩‍💻✨
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
