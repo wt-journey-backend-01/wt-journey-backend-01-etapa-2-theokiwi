@@ -8,7 +8,7 @@ const agentesController = require('../controllers/agentesController');
 //GET /agentes → Lista todos os agentes.
 //GET /agentes?cargo=inspetor → Lista todos os agentes baseado no cargo ("inspetor" ou "delegado").
 //GET /agentes?sort=dataDeIncorporacao ou sort=-dataDeIncorporacao → Lista os agentes em ordem crescente ou decrescente de data incorporação
-router.get('/agentes', agentesController.listAll);
+router.get('/agentes', agentesController.agenteGet);
 
 //GET /agentes/:id → Retorna um agente específico.
 router.get('/agentes/:id', agentesController.listID);
@@ -25,7 +25,4 @@ router.patch('/agentes/:id', agentesController.updateAgente);
 //DELETE /agentes/:id → Remove o agente.
 router.delete('/agentes/:id', agentesController.deleteAgente);
 
-//sort=dataDeIncorporacao → ordem crescente (mais antigo primeiro)
-
-//sort=-dataDeIncorporacao → ordem decrescente (mais recente primeiro)
-module.exports = router
+module.exports = router;
