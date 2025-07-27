@@ -21,8 +21,8 @@ function getCasos(req, res) {
     if (search) {
         casos = casos.filter(
             (casos) =>
-                casos.titulo.toLowerCase().includes(search.toLowerCase) ||
-                casos.descricao.toLowerCase().includes(search.toLowerCase),
+                casos.titulo.toLowerCase().includes(search.toLowerCase()) ||
+                casos.descricao.toLowerCase().includes(search.toLowerCase()),
         );
     }
 
@@ -37,7 +37,7 @@ function getAgenteCaso(req, res) {
         return res.status(404).json({ message: 'Caso não encontrados' });
     }
 
-    const agente_id = casos.agenteId;
+    const agente_id = casos.agente_id;
     const agente = agentesRepository.findAgente(agente_id);
 
     return res.status(200).json(agente);

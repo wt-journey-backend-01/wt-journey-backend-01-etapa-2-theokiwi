@@ -100,11 +100,12 @@ function removeCaso(id) {
     if (CasoToRemove > -1) {
         casos.splice(CasoToRemove, 1);
     }
+    return null;
 }
 
 //busca
 function findCaso(id) {
-    return casos.findIndex((item) => item.id === id);
+    return casos.find((item) => item.id === id);
 }
 
 //atualiza
@@ -115,7 +116,7 @@ function updateCaso(id, CasoData) {
     }
     casos[index] = {
         ...casos[index],
-        CasoData,
+        ...CasoData,
     };
 
     return casos[index];

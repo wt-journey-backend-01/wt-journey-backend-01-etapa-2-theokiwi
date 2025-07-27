@@ -35,7 +35,7 @@ function agenteGet(req, res) {
 
 function listID(req, res) {
   const { id } = req.params;
-  const agente = agentesRepository.findAgente(agente_id);
+  const agente = agentesRepository.findAgente(id);
 
   if(!agente){
     return res.status(404).json({message: "Agente come essa ID não encontrado"});
