@@ -1,8 +1,4 @@
 const agentesRepository = require("../repositories/agentesRepository");
-function getAllAgentes(req, res) {
-  const agentes = agentesRepository.findAll();
-  res.json(agentes);
-}
 
 function agenteGet(req, res) {
   const { agente, cargo, sort } = req.query;
@@ -38,19 +34,19 @@ function listID(req, res) {
   const agente = agentesRepository.findAgente(id);
 
   if(!agente){
-    return res.status(404).json({message: "Agente come essa ID não encontrado"});
+    return res.status(404).json({message: "Agente com essa ID não encontrado"});
   }
 
   return res.status(200).json(agente);
 }
 
 function addAgente(req, res){
-  const {newAgente} = req.body;
+  const newAgente = req.body; 
   
-  if(!newAgente){
+  if(!newAgente || !newAgente.nome || !newAgente.cargo || !newAgente.dataDeIncorporacao){
        return res
             .status(400)
-            .json({ message: 'Agente a ser inserido não encontrado' });
+            .json({ message: 'Dados do agente incompletos ou inválidos' });
   }
 
   const agenteAdded = agentesRepository.addAgente(newAgente);
@@ -84,6 +80,10 @@ function updateAgente(req, res){
   const {id} = req.params;
   const novosDados = req.body;
 
+  if (novosDados.id) {
+    delete novosDados.id; 
+  }
+
   if(!novosDados || !id){
     return res
             .status(400)
@@ -115,11 +115,10 @@ function deleteAgente(req, res) {
         return res.status(404).json({ message: 'Agente não encontrado' });
     }
 
-    return res.status(200).json(agenteRemovido);
+    return res.status(204).json(agenteRemovido);
 }
 
 module.exports = {
-  getAllAgentes,
   agenteGet,
   listID,
   addAgente,

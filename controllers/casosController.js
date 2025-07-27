@@ -1,6 +1,7 @@
 const casosRepository = require('../repositories/casosRepository');
 const agentesRepository = require('../repositories/agentesRepository');
 
+
 function getAllCasos(req, res) {
     const casos = casosRepository.findAll();
     res.json(casos);
@@ -37,7 +38,7 @@ function getAgenteCaso(req, res) {
         return res.status(404).json({ message: 'Caso não encontrados' });
     }
 
-    const agente_id = casos.agente_id;
+    const agente_id = caso.agente_id;
     const agente = agentesRepository.findAgente(agente_id);
 
     return res.status(200).json(agente);
@@ -48,26 +49,38 @@ function listID(req, res) {
     let caso = casosRepository.findCaso(caso_id);
 
     if (!caso) {
-        return res.status(404).json(caso);
+        return res.status(404).json({message: "Caso não encontrado"});
     }
 
     return res.status(200).json(caso);
 }
 
 function addCaso(req, res) {
-    const { caso_content } = req.body;
+    const casoData = req.body;
 
-    if (!caso_content) {
+    if (
+        !casoData ||
+        !casoData.titulo ||
+        !casoData.descricao ||
+        !casoData.status ||
+        !casoData.agente_id
+    ) {
         return res
             .status(400)
-            .json({ message: 'Caso a ser inserido não encontrado' });
+            .json({ message: 'Dados do caso incompletos ou inválidos' });
     }
 
-    const novoCaso = casosRepository.addCaso(caso_content);
+    const agenteExiste = agentesRepository.findAgente(casoData.agente_id);
+    if (!agenteExiste) {
+        return res
+            .status(404)
+            .json({ message: 'Agente responsável não encontrado' });
+    }
+
+    const novoCaso = casosRepository.addCaso(casoData);
 
     return res.status(201).json(novoCaso);
 }
-
 function updateCasoFull(req, res) {
     const { id } = req.params;
     const novosDados = req.body;
@@ -92,6 +105,9 @@ function updateCaso(req, res) {
     const { id } = req.params;
     const novosDados = req.body;
 
+    if (novosDados.id) {
+        delete novosDados.id;
+    }
     let casoExistente = casosRepository.findCaso(id);
 
     if (!casoExistente) {
@@ -102,10 +118,10 @@ function updateCaso(req, res) {
         ...casoExistente,
         ...novosDados,
     };
-  
+
     casosRepository.updateCaso(id, caso);
 
-    return res.status(200).json(caso); 
+    return res.status(204).json(caso);
 }
 
 function deleteCaso(req, res) {

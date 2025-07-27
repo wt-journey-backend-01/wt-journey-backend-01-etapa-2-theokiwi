@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require('uuid');
+
 const casos = [
     {
         id: 'f5fb2ad5-22a8-4cb4-90f2-8733517a0d46',
@@ -95,31 +97,30 @@ function addCaso(CasoData) {
 }
 
 //remove
-function removeCaso(id) {
-    const CasoToRemove = casos.findIndex((item) => item.id === id);
-    if (CasoToRemove > -1) {
-        casos.splice(CasoToRemove, 1);
-    }
+function removeCaso(id){
+  const index = casos.findIndex(item => item.id === id);
+  if(index === -1){
     return null;
+  }
+  const removed = casos.splice(index, 1)[0];
+  return removed;
 }
-
 //busca
 function findCaso(id) {
     return casos.find((item) => item.id === id);
 }
 
 //atualiza
-function updateCaso(id, CasoData) {
-    const index = findCaso(id);
-    if (index == -1) {
-        return null;
-    }
-    casos[index] = {
-        ...casos[index],
-        ...CasoData,
-    };
-
-    return casos[index];
+function updateCaso(id, casosData){
+  const index = casos.findIndex(item => item.id === id);
+  if(index === -1){
+    return null;
+  }
+  casos[index] = {
+    ...casos[index],
+    ...casosData
+  }
+  return casos[index];
 }
 
 module.exports = {

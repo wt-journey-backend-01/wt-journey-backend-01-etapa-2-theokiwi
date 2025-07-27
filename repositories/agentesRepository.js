@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require('uuid');
+
 const agentes = [
   {
     "id": "401bccf5-cf9e-489d-8412-446cd169a0f1",
@@ -78,11 +80,12 @@ function addAgente(agenteData){
 
 //remove
 function removeAgente(id){
-  const agenteToRemove = agentes.findIndex(item => item.id === id);
-  if(agenteToRemove > -1){
-    agentes.splice(agenteToRemove, 1);
+  const index = agentes.findIndex(item => item.id === id);
+  if(index === -1){
+    return null;
   }
-  return null;
+  const removed = agentes.splice(index, 1)[0];
+  return removed;
 }
 //busca
 
@@ -92,15 +95,14 @@ function findAgente(id){
 
 //atualiza
 function updateAgente(id, agenteData){
-  const index = findAgente(id);
-  if(index == -1){
+  const index = agentes.findIndex(item => item.id === id);
+  if(index === -1){
     return null;
   }
   agentes[index] = {
     ...agentes[index],
     ...agenteData
   }
-
   return agentes[index];
 }
 
