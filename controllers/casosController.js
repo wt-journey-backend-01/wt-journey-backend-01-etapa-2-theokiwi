@@ -1,5 +1,11 @@
 const casosRepository = require('../repositories/casosRepository');
 const agentesRepository = require('../repositories/agentesRepository');
+const STATUS_VALIDOS = ['solucionado', 'aberto'];
+
+function isStatusValido(status) {
+    return STATUS_VALIDOS.includes(status);
+}
+
 
 function getAllCasos(req, res) {
     const casos = casosRepository.findAll();
@@ -99,11 +105,15 @@ function updateCasoFull(req, res) {
         return res.status(404).json({ message: 'Caso não encontrado' });
     }
 
-    caso = {
-        id: caso.id,
-        ...novosDados,
-    };
+    if(!caso.titulo || !caso.descricao || !caso.status || !caso.agente_id) {
+        return res
+            .status(400)
+            .json({ message: 'Dados do caso incompletos ou inválidos' });   
+    }
 
+    if(isStatusValido(novosDados.status) === false) {
+        return res.status(400).json({ message: 'Status inválido' });
+    }   
     casosRepository.updateCaso(id, caso);
 
     return res.status(200).json(caso);
@@ -121,6 +131,16 @@ function updateCaso(req, res) {
     if (!casoExistente) {
         return res.status(404).json({ message: 'Caso não encontrado' });
     }
+
+    if(!caso.titulo || !caso.descricao || !caso.status || !caso.agente_id) {
+        return res
+            .status(400)
+            .json({ message: 'Dados do caso incompletos ou inválidos' });   
+    }
+
+    if(isStatusValido(novosDados.status) === false) {
+        return res.status(400).json({ message: 'Status inválido' });
+    }   
 
     caso = {
         ...casoExistente,

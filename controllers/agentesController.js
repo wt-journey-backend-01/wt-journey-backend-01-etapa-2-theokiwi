@@ -1,5 +1,4 @@
 const agentesRepository = require('../repositories/agentesRepository');
-const STATUS_VALIDOS = ['solucionado', 'aberto'];
 function agenteGet(req, res) {
     const { agente, cargo, sort } = req.query;
     let agentes = agentesRepository.findAll();
@@ -108,14 +107,18 @@ function updateAgenteFull(req, res) {
 
     let agente = agentesRepository.findAgente(id);
 
+    if (!agente) {
+        return res.status(404).json({ message: 'Agente não encontrado' });
+    }
+
     agente = {
         id: agente.id,
         ...novosDados,
     };
 
-    agentesRepository.updateAgente(agente);
+    const agenteAtualizado = agentesRepository.updateAgente(agente);
 
-    return res.status(200).json(agente);
+    return res.status(200).json(agenteAtualizado);
 }
 
 function updateAgente(req, res) {
@@ -143,19 +146,19 @@ function updateAgente(req, res) {
     }
 
     let agente = agentesRepository.findAgente(id);
+    if (!agente) {
+        return res.status(404).json({ message: 'Agente não encontrado' });
+    }
 
     agente = {
         ...agente,
         ...novosDados,
     };
 
-    if (!agente) {
-        return res.status(404).json({ message: 'Agente não encontrado' });
-    }
 
-    agentesRepository.updateAgente(agente);
+    const agenteAtualizado = agentesRepository.updateAgente(agente);
 
-    return res.status(200).json(agente);
+    return res.status(200).json(agenteAtualizado);
 }
 
 function deleteAgente(req, res) {
