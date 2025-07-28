@@ -41,10 +41,6 @@ function listID(req, res) {
     return res.status(200).json(agente);
 }
 
-function isStatusValido(status) {
-    return STATUS_VALIDOS.includes(status);
-}
-
 function isDataValida(dataStr) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dataStr)) return false;
 
@@ -87,7 +83,7 @@ function updateAgenteFull(req, res) {
 
     if (!novosDados || !id) {
         return res
-            .status(400)
+            .status(404)
             .json({ message: 'Conteúdo a ser inserido não encontrado' });
     }
 
@@ -95,13 +91,19 @@ function updateAgenteFull(req, res) {
         delete novosDados.id;
     }
 
+    if(!novosDados.nome || !novosDados.cargo || !novosDados.dataDeIncorporacao) {
+        return res
+            .status(404)
+            .json({ message: 'Dados do agente incompletos ou inválidos' });
+    }
+
     if (!isStatusValido(novosDados.status)) {
-        return res.status(400).json({ message: 'Status inválido' });
+        return res.status(404).json({ message: 'Status inválido' });
     }
 
     if (!isDataValida(novosDados.dataDeIncorporacao)) {
         return res
-            .status(400)
+            .status(404)
             .json({ message: 'Data de incorporação inválida' });
     }
 
@@ -127,21 +129,29 @@ function updateAgente(req, res) {
 
     if (!novosDados || !id) {
         return res
-            .status(400)
+            .status(404)
             .json({ message: 'Conteúdo a ser inserido não encontrado' });
     }
+
 
     if (novosDados.id) {
         delete novosDados.id;
     }
 
+     if(!novosDados.nome || !novosDados.cargo || !novosDados.dataDeIncorporacao) {
+        return res
+            .status(404)
+            .json({ message: 'Dados do agente incompletos ou inválidos' });
+    }
+
+
     if (!isStatusValido(novosDados.status)) {
-        return res.status(400).json({ message: 'Status inválido' });
+        return res.status(404).json({ message: 'Status inválido' });
     }
 
     if (!isDataValida(novosDados.dataDeIncorporacao)) {
         return res
-            .status(400)
+            .status(404)
             .json({ message: 'Data de incorporação inválida' });
     }
 
