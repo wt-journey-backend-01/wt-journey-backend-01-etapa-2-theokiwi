@@ -99,24 +99,32 @@ function updateCasoFull(req, res) {
     const { id } = req.params;
     const novosDados = req.body;
 
+    if (novosDados.id) {
+        delete novosDados.id;  
+    }
+
     let caso = casosRepository.findCaso(id);
 
     if (!caso) {
         return res.status(404).json({ message: 'Caso não encontrado' });
     }
 
-    if(!caso.titulo || !caso.descricao || !caso.status || !caso.agente_id) {
-        return res
-            .status(400)
-            .json({ message: 'Dados do caso incompletos ou inválidos' });   
+    const casoAtualizado = {
+        id: caso.id,
+        ...novosDados,
+    };
+
+    if (!casoAtualizado.titulo || !casoAtualizado.descricao || !casoAtualizado.status || !casoAtualizado.agente_id) {
+        return res.status(400).json({ message: 'Dados do caso incompletos ou inválidos' });
     }
 
-    if(isStatusValido(novosDados.status) === false) {
+    if (!isStatusValido(casoAtualizado.status)) {
         return res.status(400).json({ message: 'Status inválido' });
-    }   
-    casosRepository.updateCaso(id, caso);
+    }
 
-    return res.status(200).json(caso);
+    casosRepository.updateCaso(id, casoAtualizado);
+
+    return res.status(200).json(casoAtualizado);
 }
 
 function updateCaso(req, res) {
@@ -164,7 +172,7 @@ function deleteCaso(req, res) {
         return res.status(404).json({ message: 'Caso não encontrado' });
     }
 
-    return res.status(200).json(casoRemovido);
+    return res.status(204).send(); 
 }
 
 function searchCasos(req, res) {
