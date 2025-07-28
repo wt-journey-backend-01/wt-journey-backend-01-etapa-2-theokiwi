@@ -28,4 +28,5 @@ router.patch("/casos/:id", casosController.updateCaso);
 //DELETE /casos/:id → Remove um caso do sistema.
 router.delete("/casos/:id", casosController.deleteCaso);
 
+router.get('/casos/search', casosController.searchCasos);
 module.exports = router;

@@ -1,7 +1,6 @@
 const casosRepository = require('../repositories/casosRepository');
 const agentesRepository = require('../repositories/agentesRepository');
 
-
 function getAllCasos(req, res) {
     const casos = casosRepository.findAll();
     res.json(casos);
@@ -31,25 +30,34 @@ function getCasos(req, res) {
 }
 
 function getAgenteCaso(req, res) {
-    const { caso_id } = req.params;
-    let caso = casosRepository.findCaso(caso_id);
+    const { id } = req.params;
+    let caso = casosRepository.findCaso(id);
 
     if (!caso) {
         return res.status(404).json({ message: 'Caso não encontrados' });
     }
+    if (!caso.agente_id) {
+        return res
+            .status(404)
+            .json({ message: 'Caso não possui agente associado' });
+    }
 
-    const agente_id = caso.agente_id;
-    const agente = agentesRepository.findAgente(agente_id);
+    const agente_id = caso.id;
+    if (!casosRepository.findAgente(caso.agente_id)) {
+        return res.status(404).json({ message: 'Agente não encontrado' });
+    } else {
+        const agente = agentesRepository.findAgente(agente_id);
+    }
 
     return res.status(200).json(agente);
 }
 
 function listID(req, res) {
-    const { caso_id } = req.params;
-    let caso = casosRepository.findCaso(caso_id);
+    const { id } = req.params;
+    let caso = casosRepository.findCaso(id);
 
     if (!caso) {
-        return res.status(404).json({message: "Caso não encontrado"});
+        return res.status(404).json({ message: 'Caso não encontrado' });
     }
 
     return res.status(200).json(caso);
@@ -121,7 +129,7 @@ function updateCaso(req, res) {
 
     casosRepository.updateCaso(id, caso);
 
-    return res.status(204).json(caso);
+    return res.status(200).json(caso);
 }
 
 function deleteCaso(req, res) {
@@ -136,6 +144,22 @@ function deleteCaso(req, res) {
     return res.status(200).json(casoRemovido);
 }
 
+function searchCasos(req, res) {
+  const { q } = req.query;
+  if (!q) {
+    return res.status(400).json({ message: 'Query de busca não fornecida' });
+  }
+
+  let casos = casosRepository.findAll();
+
+  casos = casos.filter(caso =>
+    caso.titulo.toLowerCase().includes(q.toLowerCase()) ||
+    caso.descricao.toLowerCase().includes(q.toLowerCase())
+  );
+
+  return res.status(200).json(casos);
+}
+
 module.exports = {
     getAllCasos,
     getCasos,
@@ -145,4 +169,5 @@ module.exports = {
     updateCasoFull,
     updateCaso,
     deleteCaso,
+    searchCasos
 };
